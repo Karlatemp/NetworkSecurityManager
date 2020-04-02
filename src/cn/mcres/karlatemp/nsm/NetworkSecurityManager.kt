@@ -28,7 +28,7 @@ object NetworkSecurityManager {
     fun check(
         zip: ZipFile,
         caRoot: X509Certificate,
-        invalid: Collection<X509Certificate>,
+        revoked: Collection<X509Certificate>,
         warning: (message: String) -> Unit
     ): Boolean {
         val stream = zip.getInputStream(zip.getEntry("NSM/x509") ?: return false) ?: return false
@@ -57,7 +57,7 @@ object NetworkSecurityManager {
             if (c.issuerDN == last.subjectDN) {
                 c.verify(last.publicKey)
                 last = c
-                if (invalid.contains(c)) throw SecurityException("Certificate invalid.")
+                if (revoked.contains(c)) throw SecurityException("Certificate has been revoked.")
             } else {
                 throw SecurityException("Cannot check link")
             }
